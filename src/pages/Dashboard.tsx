@@ -137,13 +137,22 @@ export default function Dashboard() {
             <h1 className="text-4xl md:text-5xl font-display mb-2">DASHBOARD</h1>
             <p className="text-muted-foreground">Manage your tournaments and matches</p>
           </div>
-          <Button 
-            className="bg-gradient-hero hover:opacity-90" 
-            onClick={() => navigate('/tournaments/create')}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create Tournament
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/matches/create')}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Create Match
+            </Button>
+            <Button 
+              className="bg-gradient-hero hover:opacity-90" 
+              onClick={() => navigate('/tournaments/create')}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Tournament
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
