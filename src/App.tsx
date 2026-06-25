@@ -11,6 +11,7 @@ import Matches from "./pages/Matches";
 import Dashboard from "./pages/Dashboard";
 import CreateTournament from "./pages/CreateTournament";
 import CreateMatch from "./pages/CreateMatch";
+import MatchDetail from "./pages/MatchDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tournaments/create" element={<CreateTournament />} />
             <Route path="/matches/create" element={<CreateMatch />} />
+            <Route path="/matches/:id" element={<MatchDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
