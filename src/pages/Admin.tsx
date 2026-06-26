@@ -508,11 +508,11 @@ export default function Admin() {
                         <Badge variant="outline">#{p.display_order}</Badge>
                       </div>
                       {p.body && <p className="text-sm text-muted-foreground line-clamp-2">{p.body}</p>}
-                      {p.link_url && (
+                      {isSafeHttpUrl(p.link_url) && (
                         <a
-                          href={p.link_url}
+                          href={p.link_url as string}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           className="text-xs text-primary underline truncate block"
                         >
                           {p.link_url}
