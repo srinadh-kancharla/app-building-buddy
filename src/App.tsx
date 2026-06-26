@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import CreateTournament from "./pages/CreateTournament";
 import CreateMatch from "./pages/CreateMatch";
 import MatchDetail from "./pages/MatchDetail";
+import TournamentDetail from "./pages/TournamentDetail";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -34,6 +35,8 @@ const App = () => (
             <Route path="/tournaments/create" element={<CreateTournament />} />
             <Route path="/matches/create" element={<CreateMatch />} />
             <Route path="/matches/:id" element={<MatchDetail />} />
+            <Route path="/tournaments/:id" element={<TournamentDetail />} />
+            <Route path="/tournaments/:id/manage" element={<TournamentDetail />} />
             <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Admin /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
