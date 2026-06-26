@@ -86,8 +86,18 @@ const ROLE_ORDER: AppRole[] = ['admin', 'organizer', 'user'];
 const roleVariant = (role: AppRole) =>
   role === 'admin' ? 'default' : role === 'organizer' ? 'secondary' : 'outline';
 
+const isSafeHttpUrl = (url: string | null | undefined): url is string => {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 export default function Admin() {
-  const { user, isAdmin, isLoading } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
@@ -108,13 +118,6 @@ export default function Admin() {
     is_active: true,
     display_order: 0,
   });
-
-  useEffect(() => {
-    if (!isLoading && !isAdmin) {
-      toast.error('Admin access required');
-      navigate('/');
-    }
-  }, [isLoading, isAdmin, navigate]);
 
   const loadAll = async () => {
     setLoading(true);
