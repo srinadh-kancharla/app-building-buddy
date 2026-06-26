@@ -253,7 +253,7 @@ export default function Admin() {
 
   const tournamentName = (id: string) => tournaments.find((t) => t.id === id)?.name ?? '—';
 
-  if (isLoading || !isAdmin) {
+  if (loading) {
     return (
       <Layout>
         <div className="container py-20 text-center text-muted-foreground">Loading…</div>
