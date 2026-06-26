@@ -86,8 +86,18 @@ const ROLE_ORDER: AppRole[] = ['admin', 'organizer', 'user'];
 const roleVariant = (role: AppRole) =>
   role === 'admin' ? 'default' : role === 'organizer' ? 'secondary' : 'outline';
 
+const isSafeHttpUrl = (url: string | null | undefined): url is string => {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 export default function Admin() {
-  const { user, isAdmin, isLoading } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
@@ -108,13 +118,6 @@ export default function Admin() {
     is_active: true,
     display_order: 0,
   });
-
-  useEffect(() => {
-    if (!isLoading && !isAdmin) {
-      toast.error('Admin access required');
-      navigate('/');
-    }
-  }, [isLoading, isAdmin, navigate]);
 
   const loadAll = async () => {
     setLoading(true);
@@ -200,11 +203,21 @@ export default function Admin() {
 
   const savePromo = async () => {
     if (!promoForm.title.trim()) return toast.error('Title is required');
+
+    const linkUrl = promoForm.link_url.trim();
+    if (linkUrl && !isSafeHttpUrl(linkUrl)) {
+      return toast.error('Link URL must start with http:// or https://');
+    }
+    const imageUrl = promoForm.image_url.trim();
+    if (imageUrl && !isSafeHttpUrl(imageUrl)) {
+      return toast.error('Image URL must start with http:// or https://');
+    }
+
     const payload = {
       title: promoForm.title.trim(),
       body: promoForm.body.trim() || null,
-      image_url: promoForm.image_url.trim() || null,
-      link_url: promoForm.link_url.trim() || null,
+      image_url: imageUrl || null,
+      link_url: linkUrl || null,
       is_active: promoForm.is_active,
       display_order: Number(promoForm.display_order) || 0,
     };
@@ -250,7 +263,7 @@ export default function Admin() {
 
   const tournamentName = (id: string) => tournaments.find((t) => t.id === id)?.name ?? '—';
 
-  if (isLoading || !isAdmin) {
+  if (loading) {
     return (
       <Layout>
         <div className="container py-20 text-center text-muted-foreground">Loading…</div>
@@ -495,11 +508,11 @@ export default function Admin() {
                         <Badge variant="outline">#{p.display_order}</Badge>
                       </div>
                       {p.body && <p className="text-sm text-muted-foreground line-clamp-2">{p.body}</p>}
-                      {p.link_url && (
+                      {isSafeHttpUrl(p.link_url) && (
                         <a
-                          href={p.link_url}
+                          href={p.link_url as string}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           className="text-xs text-primary underline truncate block"
                         >
                           {p.link_url}
