@@ -104,7 +104,6 @@ export default function MatchDetail() {
   const checkPermission = useCallback(async () => {
     if (!user || !match) return setCanScore(false);
     const { data } = await supabase.rpc('can_manage_tournament', {
-      _user_id: user.id,
       _tournament_id: match.tournament_id,
     });
     setCanScore(!!data);

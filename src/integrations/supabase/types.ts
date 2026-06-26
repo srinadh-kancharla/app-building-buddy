@@ -363,7 +363,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_manage_tournament: {
+        Args: { _tournament_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "organizer" | "user"
