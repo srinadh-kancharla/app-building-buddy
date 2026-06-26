@@ -34,7 +34,7 @@ const App = () => (
             <Route path="/tournaments/create" element={<CreateTournament />} />
             <Route path="/matches/create" element={<CreateMatch />} />
             <Route path="/matches/:id" element={<MatchDetail />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Admin /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
