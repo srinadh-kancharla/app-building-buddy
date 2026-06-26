@@ -203,11 +203,21 @@ export default function Admin() {
 
   const savePromo = async () => {
     if (!promoForm.title.trim()) return toast.error('Title is required');
+
+    const linkUrl = promoForm.link_url.trim();
+    if (linkUrl && !isSafeHttpUrl(linkUrl)) {
+      return toast.error('Link URL must start with http:// or https://');
+    }
+    const imageUrl = promoForm.image_url.trim();
+    if (imageUrl && !isSafeHttpUrl(imageUrl)) {
+      return toast.error('Image URL must start with http:// or https://');
+    }
+
     const payload = {
       title: promoForm.title.trim(),
       body: promoForm.body.trim() || null,
-      image_url: promoForm.image_url.trim() || null,
-      link_url: promoForm.link_url.trim() || null,
+      image_url: imageUrl || null,
+      link_url: linkUrl || null,
       is_active: promoForm.is_active,
       display_order: Number(promoForm.display_order) || 0,
     };
