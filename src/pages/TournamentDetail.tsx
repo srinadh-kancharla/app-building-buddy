@@ -220,9 +220,14 @@ export default function TournamentDetail() {
                           <CheckCircle2 className="h-4 w-4 mr-1" /> End
                         </Button>
                       )}
-                      <Button size="sm" variant="secondary" asChild>
+                      <Button
+                        size="sm"
+                        asChild
+                        className={canManage ? 'bg-gradient-hero hover:opacity-90' : ''}
+                        variant={canManage ? 'default' : 'secondary'}
+                      >
                         <Link to={`/matches/${m.id}`}>
-                          {canManage ? 'Score' : 'View'}
+                          {canManage ? (<><ClipboardEdit className="h-4 w-4 mr-1" /> Update Score</>) : 'View'}
                         </Link>
                       </Button>
                     </div>
