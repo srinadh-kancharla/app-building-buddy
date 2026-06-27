@@ -165,7 +165,7 @@ export default function MatchDetail() {
       overs: score?.overs ?? 0,
       target: score?.target?.toString() ?? '',
       innings: score?.innings ?? 1,
-      status: match.status,
+      status: match.status === 'scheduled' ? 'live' : match.status,
     });
   }, [match, score, draft]);
 
