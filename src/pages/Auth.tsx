@@ -162,16 +162,27 @@ export default function Auth() {
 
         <Card className="border-0 shadow-lg">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-2xl font-display text-center">Get Started</CardTitle>
+            <CardTitle className="text-2xl font-display text-center">Organizer Access</CardTitle>
             <CardDescription className="text-center">
-              Sign in to your account or create a new one
+              Accounts are for organizers only. Fans can browse tournaments &amp; live scores without signing up.
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm text-foreground/80">
+              <span className="font-semibold text-primary">Note:</span> Only <span className="font-semibold">organizers</span> need to create an account to host tournaments and manage matches. Regular users can{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/tournaments')}
+                className="underline underline-offset-2 text-primary hover:opacity-80"
+              >
+                browse tournaments
+              </button>{' '}
+              and watch live scores without registering.
+            </div>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login" className="font-medium">Login</TabsTrigger>
-                <TabsTrigger value="signup" className="font-medium">Sign Up</TabsTrigger>
+                <TabsTrigger value="login" className="font-medium">Organizer Login</TabsTrigger>
+                <TabsTrigger value="signup" className="font-medium">Organizer Sign Up</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
