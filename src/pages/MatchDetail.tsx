@@ -165,7 +165,7 @@ export default function MatchDetail() {
       overs: score?.overs ?? 0,
       target: score?.target?.toString() ?? '',
       innings: score?.innings ?? 1,
-      status: match.status,
+      status: match.status === 'scheduled' ? 'live' : match.status,
     });
   }, [match, score, draft]);
 
@@ -393,6 +393,14 @@ export default function MatchDetail() {
         </Card>
 
         {/* Scoring Controls (organizers/scorers only) */}
+        {!canScore && user && (
+          <Card className="border-0 shadow-md mb-6 border-l-4 border-l-muted">
+            <CardContent className="py-4 text-sm text-muted-foreground">
+              Only the tournament organizer (or invited co-scorers) can update this match's score.
+            </CardContent>
+          </Card>
+        )}
+
         {canScore && draft && (
           <Card className="border-0 shadow-md border-l-4 border-l-primary">
             <CardHeader>

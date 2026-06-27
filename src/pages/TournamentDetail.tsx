@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Trophy, Calendar, MapPin, ArrowLeft, Plus, Play, Radio, CheckCircle2, Loader2,
+  Trophy, Calendar, MapPin, ArrowLeft, Plus, Play, Radio, CheckCircle2, Loader2, Pencil, ClipboardEdit,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -123,7 +123,14 @@ export default function TournamentDetail() {
                   {tournament.end_date && ` – ${format(new Date(tournament.end_date), 'MMM d, yyyy')}`}
                 </p>
               </div>
-              <Badge variant="secondary" className="uppercase">{tournament.status}</Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="uppercase">{tournament.status}</Badge>
+                {canManage && (
+                  <Button size="sm" variant="secondary" onClick={() => navigate(`/tournaments/${tournament.id}/edit`)}>
+                    <Pencil className="h-4 w-4 mr-1" /> Edit
+                  </Button>
+                )}
+              </div>
             </div>
             {tournament.description && (
               <p className="mt-4 text-sm opacity-90 max-w-2xl">{tournament.description}</p>
@@ -213,9 +220,14 @@ export default function TournamentDetail() {
                           <CheckCircle2 className="h-4 w-4 mr-1" /> End
                         </Button>
                       )}
-                      <Button size="sm" variant="secondary" asChild>
+                      <Button
+                        size="sm"
+                        asChild
+                        className={canManage ? 'bg-gradient-hero hover:opacity-90' : ''}
+                        variant={canManage ? 'default' : 'secondary'}
+                      >
                         <Link to={`/matches/${m.id}`}>
-                          {canManage ? 'Score' : 'View'}
+                          {canManage ? (<><ClipboardEdit className="h-4 w-4 mr-1" /> Update Score</>) : 'View'}
                         </Link>
                       </Button>
                     </div>
