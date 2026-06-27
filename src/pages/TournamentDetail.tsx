@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Trophy, Calendar, MapPin, ArrowLeft, Plus, Play, Radio, CheckCircle2, Loader2,
+  Trophy, Calendar, MapPin, ArrowLeft, Plus, Play, Radio, CheckCircle2, Loader2, Pencil, ClipboardEdit,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
