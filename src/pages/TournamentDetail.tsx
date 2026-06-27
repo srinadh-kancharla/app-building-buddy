@@ -123,7 +123,14 @@ export default function TournamentDetail() {
                   {tournament.end_date && ` – ${format(new Date(tournament.end_date), 'MMM d, yyyy')}`}
                 </p>
               </div>
-              <Badge variant="secondary" className="uppercase">{tournament.status}</Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="uppercase">{tournament.status}</Badge>
+                {canManage && (
+                  <Button size="sm" variant="secondary" onClick={() => navigate(`/tournaments/${tournament.id}/edit`)}>
+                    <Pencil className="h-4 w-4 mr-1" /> Edit
+                  </Button>
+                )}
+              </div>
             </div>
             {tournament.description && (
               <p className="mt-4 text-sm opacity-90 max-w-2xl">{tournament.description}</p>
