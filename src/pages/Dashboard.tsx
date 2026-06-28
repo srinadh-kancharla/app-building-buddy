@@ -14,7 +14,9 @@ import {
   Users, 
   MapPin,
   ArrowRight,
-  BarChart3 
+  BarChart3,
+  Radio,
+  ClipboardEdit,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -26,10 +28,22 @@ interface Tournament {
   format: string;
 }
 
+interface ScoreMatch {
+  id: string;
+  match_date: string;
+  status: string;
+  tournament_id: string;
+  team_a: { name: string; short_name: string | null } | null;
+  team_b: { name: string; short_name: string | null } | null;
+  tournament: { name: string } | null;
+  live_scores: { runs: number; wickets: number; overs: number; batting_team_id: string }[] | null;
+}
+
 export default function Dashboard() {
-  const { user, isOrganizer, isLoading: authLoading } = useAuth();
+  const { user, isOrganizer, isAdmin, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [scoreMatches, setScoreMatches] = useState<ScoreMatch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({ tournaments: 0, matches: 0, teams: 0 });
 
@@ -47,27 +61,42 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     // Fetch user's tournaments
-    const { data: tournamentsData } = await supabase
+    const tournamentQuery = supabase
       .from('tournaments')
       .select('id, name, start_date, status, format')
-      .eq('organizer_id', user?.id)
       .order('created_at', { ascending: false })
       .limit(5);
+
+    if (!isAdmin) {
+      tournamentQuery.eq('organizer_id', user?.id);
+    }
+
+    const { data: tournamentsData } = await tournamentQuery;
 
     if (tournamentsData) {
       setTournaments(tournamentsData);
     }
 
     // Fetch stats
-    const { count: tournamentCount } = await supabase
+    const tournamentCountQuery = supabase
       .from('tournaments')
-      .select('*', { count: 'exact', head: true })
-      .eq('organizer_id', user?.id);
+      .select('*', { count: 'exact', head: true });
 
-    const { data: userTournaments } = await supabase
+    if (!isAdmin) {
+      tournamentCountQuery.eq('organizer_id', user?.id);
+    }
+
+    const { count: tournamentCount } = await tournamentCountQuery;
+
+    const userTournamentsQuery = supabase
       .from('tournaments')
-      .select('id')
-      .eq('organizer_id', user?.id);
+      .select('id');
+
+    if (!isAdmin) {
+      userTournamentsQuery.eq('organizer_id', user?.id);
+    }
+
+    const { data: userTournaments } = await userTournamentsQuery;
 
     const tournamentIds = userTournaments?.map((t) => t.id) || [];
 
@@ -81,11 +110,37 @@ export default function Dashboard() {
         .in('tournament_id', tournamentIds);
       matchCount = mCount || 0;
 
+      const { data: scoringData } = await supabase
+        .from('matches')
+        .select(`
+          id,
+          match_date,
+          status,
+          tournament_id,
+          tournament:tournaments(name),
+          team_a:teams!matches_team_a_id_fkey(name, short_name),
+          team_b:teams!matches_team_b_id_fkey(name, short_name),
+          live_scores(runs, wickets, overs, batting_team_id)
+        `)
+        .in('tournament_id', tournamentIds)
+        .in('status', ['scheduled', 'live'])
+        .order('match_date', { ascending: false })
+        .limit(8);
+
+      setScoreMatches(
+        ((scoringData ?? []) as any[]).map((match) => ({
+          ...match,
+          live_scores: match.live_scores ? [match.live_scores].flat() : null,
+        })) as ScoreMatch[]
+      );
+
       const { count: tCount } = await supabase
         .from('teams')
         .select('*', { count: 'exact', head: true })
         .in('tournament_id', tournamentIds);
       teamCount = tCount || 0;
+    } else {
+      setScoreMatches([]);
     }
 
     setStats({
@@ -199,6 +254,70 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Score Updates */}
+        <Card className="border-0 shadow-md mb-8">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <ClipboardEdit className="h-5 w-5 text-primary" /> Score Update Section
+                </CardTitle>
+                <CardDescription>Open any active match to start or update the live score.</CardDescription>
+              </div>
+              <Button variant="outline" onClick={() => navigate('/matches/create')}>
+                <Plus className="h-4 w-4 mr-2" /> Create Match
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-4">
+                {[1, 2].map((i) => <Skeleton key={i} className="h-20" />)}
+              </div>
+            ) : scoreMatches.length === 0 ? (
+              <div className="text-center py-8">
+                <Radio className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">No matches ready for scoring</h3>
+                <p className="text-muted-foreground mb-4">Create a match first, then return here to update the score.</p>
+                <Button onClick={() => navigate('/matches/create')} className="bg-gradient-hero hover:opacity-90">
+                  <Plus className="h-4 w-4 mr-2" /> Schedule Match
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {scoreMatches.map((match) => {
+                  const liveScore = match.live_scores?.[0];
+                  return (
+                    <div
+                      key={match.id}
+                      className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 rounded-lg bg-muted/50"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant={match.status === 'live' ? 'default' : 'secondary'}>
+                            {match.status === 'live' ? 'Live' : 'Upcoming'}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">{match.tournament?.name || 'Tournament'}</span>
+                        </div>
+                        <h4 className="font-semibold">
+                          {match.team_a?.short_name || match.team_a?.name || 'TBA'} vs {match.team_b?.short_name || match.team_b?.name || 'TBA'}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(match.match_date), 'MMM d, h:mm a')}
+                          {liveScore && ` • ${liveScore.runs}/${liveScore.wickets} (${liveScore.overs})`}
+                        </p>
+                      </div>
+                      <Button onClick={() => navigate(`/matches/${match.id}`)} className="bg-gradient-hero hover:opacity-90">
+                        <ClipboardEdit className="h-4 w-4 mr-2" /> Update Score
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Recent Tournaments */}
         <Card className="border-0 shadow-md">
