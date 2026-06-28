@@ -14,7 +14,6 @@ import {
   Users, 
   MapPin,
   ArrowRight,
-  BarChart3,
   Radio,
   ClipboardEdit,
 } from 'lucide-react';
@@ -61,21 +60,41 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     // Fetch user's tournaments
-    const tournamentQuery = supabase
+    const { data: ownedTournamentIds } = await supabase
       .from('tournaments')
-      .select('id, name, start_date, status, format')
-      .order('created_at', { ascending: false })
-      .limit(5);
+      .select('id')
+      .eq('organizer_id', user?.id);
 
-    if (!isAdmin) {
-      tournamentQuery.eq('organizer_id', user?.id);
+    const { data: scoringAssignments } = await supabase
+      .from('tournament_organizers')
+      .select('tournament_id')
+      .eq('user_id', user?.id);
+
+    const manageableTournamentIds = Array.from(new Set([
+      ...(ownedTournamentIds ?? []).map((t) => t.id),
+      ...(scoringAssignments ?? []).map((t) => t.tournament_id),
+    ]));
+
+    let tournamentsData: Tournament[] = [];
+
+    if (isAdmin) {
+      const { data } = await supabase
+        .from('tournaments')
+        .select('id, name, start_date, status, format')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      tournamentsData = (data ?? []) as Tournament[];
+    } else if (manageableTournamentIds.length > 0) {
+      const { data } = await supabase
+        .from('tournaments')
+        .select('id, name, start_date, status, format')
+        .in('id', manageableTournamentIds)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      tournamentsData = (data ?? []) as Tournament[];
     }
 
-    const { data: tournamentsData } = await tournamentQuery;
-
-    if (tournamentsData) {
-      setTournaments(tournamentsData);
-    }
+    setTournaments(tournamentsData);
 
     // Fetch stats
     const tournamentCountQuery = supabase
@@ -88,17 +107,9 @@ export default function Dashboard() {
 
     const { count: tournamentCount } = await tournamentCountQuery;
 
-    const userTournamentsQuery = supabase
-      .from('tournaments')
-      .select('id');
-
-    if (!isAdmin) {
-      userTournamentsQuery.eq('organizer_id', user?.id);
-    }
-
-    const { data: userTournaments } = await userTournamentsQuery;
-
-    const tournamentIds = userTournaments?.map((t) => t.id) || [];
+    const tournamentIds = isAdmin
+      ? (await supabase.from('tournaments').select('id')).data?.map((t) => t.id) || []
+      : manageableTournamentIds;
 
     let matchCount = 0;
     let teamCount = 0;
