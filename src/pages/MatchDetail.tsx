@@ -401,11 +401,24 @@ export default function MatchDetail() {
           </Card>
         )}
 
+        {!user && (
+          <Card className="border-0 shadow-md mb-6 border-l-4 border-l-primary">
+            <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground">
+                Organizer sign-in is required to update this score. Fans can continue viewing the live score without an account.
+              </p>
+              <Button asChild size="sm" className="bg-gradient-hero hover:opacity-90">
+                <Link to="/auth">Organizer Sign In</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {canScore && draft && (
           <Card className="border-0 shadow-md border-l-4 border-l-primary">
             <CardHeader>
               <CardTitle className="text-xl flex items-center gap-2">
-                <Radio className="h-5 w-5 text-primary" /> Scoring Controls
+                <Radio className="h-5 w-5 text-primary" /> Score Update Section
               </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Changes broadcast live to all viewers when you save.
