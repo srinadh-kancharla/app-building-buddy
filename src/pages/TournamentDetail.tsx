@@ -85,6 +85,18 @@ export default function TournamentDetail() {
     load();
   };
 
+  const handleDelete = async (matchId: string) => {
+    setUpdatingId(matchId);
+    const { error } = await supabase.from('matches').delete().eq('id', matchId);
+    setUpdatingId(null);
+    if (error) {
+      toast({ title: 'Failed to delete', description: error.message, variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Match deleted' });
+    load();
+  };
+
   if (loading) {
     return (
       <Layout>
