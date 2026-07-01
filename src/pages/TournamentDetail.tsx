@@ -10,7 +10,12 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Trophy, Calendar, MapPin, ArrowLeft, Plus, Play, Radio, CheckCircle2, Loader2, Pencil, ClipboardEdit,
+  Trash2, AlertTriangle,
 } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 
 interface Tournament {
