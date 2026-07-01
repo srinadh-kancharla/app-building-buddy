@@ -14,6 +14,7 @@ import CreateMatch from "./pages/CreateMatch";
 import MatchDetail from "./pages/MatchDetail";
 import TournamentDetail from "./pages/TournamentDetail";
 import EditTournament from "./pages/EditTournament";
+import EditMatch from "./pages/EditMatch";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
