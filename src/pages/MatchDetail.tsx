@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
-import { Radio, Calendar, MapPin, Trophy, ArrowLeft } from 'lucide-react';
+import { Radio, Calendar, MapPin, Trophy, ArrowLeft, Pencil, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import BallByBallScorer from '@/components/scoring/BallByBallScorer';
 import Scorecard from '@/components/scoring/Scorecard';
@@ -183,13 +183,23 @@ export default function MatchDetail() {
         {/* Match Header */}
         <Card className="border-0 shadow-md mb-6 overflow-hidden">
           <div className="bg-gradient-hero text-primary-foreground p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
               <Link to={`/tournaments/${match.tournament_id}`} className="text-sm text-primary-foreground/80 hover:text-primary-foreground flex items-center gap-1">
                 <Trophy className="h-4 w-4" /> {match.tournament?.name || 'Tournament'}
               </Link>
-              {match.status === 'live' && <Badge className="bg-live animate-pulse-live border-0"><Radio className="h-3 w-3 mr-1" /> LIVE</Badge>}
-              {match.status === 'scheduled' && <Badge variant="secondary">Upcoming</Badge>}
-              {match.status === 'completed' && <Badge variant="secondary">Completed</Badge>}
+              <div className="flex items-center gap-2">
+                {match.status === 'live' && <Badge className="bg-live animate-pulse-live border-0"><Radio className="h-3 w-3 mr-1" /> LIVE</Badge>}
+                {match.status === 'scheduled' && <Badge variant="secondary">Upcoming</Badge>}
+                {match.status === 'completed' && <Badge variant="secondary">Completed</Badge>}
+                {['abandoned', 'cancelled', 'postponed'].includes(match.status) && (
+                  <Badge variant="destructive" className="capitalize"><AlertTriangle className="h-3 w-3 mr-1" />{match.status}</Badge>
+                )}
+                {canScore && (
+                  <Button asChild size="sm" variant="secondary">
+                    <Link to={`/matches/${match.id}/edit`}><Pencil className="h-4 w-4 mr-1" /> Edit</Link>
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-3 items-center gap-4">

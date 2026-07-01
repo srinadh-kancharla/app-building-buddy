@@ -10,7 +10,12 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Trophy, Calendar, MapPin, ArrowLeft, Plus, Play, Radio, CheckCircle2, Loader2, Pencil, ClipboardEdit,
+  Trash2, AlertTriangle,
 } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 
 interface Tournament {
@@ -77,6 +82,18 @@ export default function TournamentDetail() {
       return;
     }
     toast({ title: status === 'live' ? 'Match started' : 'Match completed' });
+    load();
+  };
+
+  const handleDelete = async (matchId: string) => {
+    setUpdatingId(matchId);
+    const { error } = await supabase.from('matches').delete().eq('id', matchId);
+    setUpdatingId(null);
+    if (error) {
+      toast({ title: 'Failed to delete', description: error.message, variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Match deleted' });
     load();
   };
 
@@ -169,7 +186,7 @@ export default function TournamentDetail() {
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div className="flex-1 min-w-[200px]">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
                         {m.status === 'live' && (
                           <Badge className="bg-live animate-pulse-live">
                             <Radio className="h-3 w-3 mr-1" /> LIVE
@@ -177,6 +194,11 @@ export default function TournamentDetail() {
                         )}
                         {m.status === 'scheduled' && <Badge variant="secondary">Upcoming</Badge>}
                         {m.status === 'completed' && <Badge variant="outline">Completed</Badge>}
+                        {['abandoned', 'cancelled', 'postponed'].includes(m.status) && (
+                          <Badge variant="destructive" className="capitalize">
+                            <AlertTriangle className="h-3 w-3 mr-1" /> {m.status}
+                          </Badge>
+                        )}
                         <span className="text-xs text-muted-foreground">{m.overs_per_innings} overs</span>
                       </div>
                       <p className="text-lg font-semibold">
@@ -194,11 +216,14 @@ export default function TournamentDetail() {
                         )}
                       </div>
                       {m.result_summary && (
-                        <p className="text-sm text-primary font-medium mt-2">{m.result_summary}</p>
+                        <p className={`text-sm font-medium mt-2 ${['abandoned', 'cancelled', 'postponed'].includes(m.status) ? 'text-destructive' : 'text-primary'}`}>
+                          {['abandoned', 'cancelled', 'postponed'].includes(m.status) && '⚠ '}
+                          {m.result_summary}
+                        </p>
                       )}
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
                       {canManage && m.status === 'scheduled' && (
                         <Button
                           size="sm"
@@ -207,7 +232,7 @@ export default function TournamentDetail() {
                           onClick={() => setStatus(m.id, 'live')}
                         >
                           {updatingId === m.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4 mr-1" />}
-                          Start Match
+                          Start
                         </Button>
                       )}
                       {canManage && m.status === 'live' && (
@@ -217,7 +242,7 @@ export default function TournamentDetail() {
                           disabled={updatingId === m.id}
                           onClick={() => setStatus(m.id, 'completed')}
                         >
-                          <CheckCircle2 className="h-4 w-4 mr-1" /> End
+                          <CheckCircle2 className="h-4 w-4 mr-1" /> Complete
                         </Button>
                       )}
                       <Button
@@ -227,9 +252,42 @@ export default function TournamentDetail() {
                         variant={canManage ? 'default' : 'secondary'}
                       >
                         <Link to={`/matches/${m.id}`}>
-                          {canManage ? (<><ClipboardEdit className="h-4 w-4 mr-1" /> Update Score</>) : 'View'}
+                          {canManage ? (<><ClipboardEdit className="h-4 w-4 mr-1" /> Score</>) : 'View'}
                         </Link>
                       </Button>
+                      {canManage && (
+                        <Button size="sm" variant="outline" asChild>
+                          <Link to={`/matches/${m.id}/edit`}>
+                            <Pencil className="h-4 w-4 mr-1" /> Edit
+                          </Link>
+                        </Button>
+                      )}
+                      {canManage && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete this match?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This permanently removes the match and all its scoring data. This cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(m.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </div>
                   </div>
                 </CardContent>

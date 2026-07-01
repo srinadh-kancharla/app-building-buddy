@@ -14,6 +14,7 @@ import CreateMatch from "./pages/CreateMatch";
 import MatchDetail from "./pages/MatchDetail";
 import TournamentDetail from "./pages/TournamentDetail";
 import EditTournament from "./pages/EditTournament";
+import EditMatch from "./pages/EditMatch";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/tournaments/create" element={<CreateTournament />} />
             <Route path="/matches/create" element={<CreateMatch />} />
             <Route path="/matches/:id" element={<MatchDetail />} />
+            <Route path="/matches/:id/edit" element={<EditMatch />} />
             <Route path="/tournaments/:id" element={<TournamentDetail />} />
             <Route path="/tournaments/:id/edit" element={<EditTournament />} />
             <Route path="/tournaments/:id/manage" element={<TournamentDetail />} />
