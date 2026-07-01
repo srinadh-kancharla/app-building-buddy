@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
-import { Radio, Calendar, MapPin, Trophy, ArrowLeft } from 'lucide-react';
+import { Radio, Calendar, MapPin, Trophy, ArrowLeft, Pencil, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import BallByBallScorer from '@/components/scoring/BallByBallScorer';
 import Scorecard from '@/components/scoring/Scorecard';
